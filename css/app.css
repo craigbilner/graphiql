@@ -116,6 +116,10 @@ html, body {
   border-left: solid 1px #e0e0e0;
 }
 
+#graphiql-container .resultWrap.isWaitingForResponse .CodeMirror {
+  background: rgb(200, 200, 200);
+}
+
 #graphiql-container .docExplorerWrap {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
   z-index: 3;

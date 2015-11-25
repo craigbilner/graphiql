@@ -67,8 +67,6 @@ export class ResultViewer extends React.Component {
   }
 
   render() {
-    return (
-      <div className="result-window" />
-    );
+    return <div className="result-window" />;
   }
 }
