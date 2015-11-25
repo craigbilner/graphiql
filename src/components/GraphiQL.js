@@ -171,6 +171,7 @@ export class GraphiQL extends React.Component {
       variableEditorHeight: this._storageGet('variableEditorHeight') || 200,
       docsOpen: false,
       docsWidth: this._storageGet('docExplorerWidth') || 350,
+      showSpinner: false,
     };
 
     // Ensure only the last executed editor query is rendered.
@@ -199,6 +200,10 @@ export class GraphiQL extends React.Component {
 
   componentDidMount() {
     if (!this.state.schema) {
+      this.setState({
+        showSpinner: true
+      });
+
       var fetcher = this.props.fetcher;
 
       // Try the stock introspection query first, falling back on the
@@ -207,9 +212,15 @@ export class GraphiQL extends React.Component {
         .catch(() => fetcher({ query: introspectionQuerySansSubscriptions }))
         .then(result => {
           if (!result.data) {
-            this.setState({ response: JSON.stringify(result, null, 2) });
+            this.setState({
+              showSpinner: false,
+              response: JSON.stringify(result, null, 2)
+            });
           } else {
-            this.setState({ schema: buildClientSchema(result.data) });
+            this.setState({
+              showSpinner: false,
+              schema: buildClientSchema(result.data)
+            });
           }
         })
         .catch(error => {
@@ -297,7 +308,10 @@ export class GraphiQL extends React.Component {
               </div>
             </div>
             <div className="resultWrap">
-              <ResultViewer ref="result" value={this.state.response} />
+              <ResultViewer ref="result"
+                showSpinner={this.state.showSpinner}
+                value={this.state.response}
+              />
               {footer}
             </div>
           </div>
@@ -329,11 +343,18 @@ export class GraphiQL extends React.Component {
 
   _fetchQuery(query, variables, cb) {
     this.props.fetcher({ query, variables }).then(cb).catch(error => {
-      this.setState({ response: error && error.stack || error });
+      this.setState({
+        showSpinner: false,
+        response: error && error.stack || error
+      });
     });
   }
 
   _runEditorQuery = () => {
+    this.setState({
+      showSpinner: true,
+    });
+
     this._editorQueryID++;
     var queryID = this._editorQueryID;
 
@@ -344,7 +365,10 @@ export class GraphiQL extends React.Component {
 
     this._fetchQuery(editedQuery, this.state.variables, result => {
       if (queryID === this._editorQueryID) {
-        this.setState({ response: JSON.stringify(result, null, 2) });
+        this.setState({
+          showSpinner: false,
+          response: JSON.stringify(result, null, 2),
+        });
       }
     });
   }
